@@ -373,7 +373,15 @@ static void update_gamepad_list( char *data )
             memcpy( gamepads[i].name, data + (j + 1), name_len );
             gamepads[i].name[name_len] = '\0';
         }
-        else memset( &gamepads[i].state, 0, sizeof(gamepads[i].state) );
+        else
+        {
+            memset( &gamepads[i].state, 0, sizeof(gamepads[i].state) );
+            if (gamepads[i].acquired && gamepads[i].hEvent)
+            {
+                SetEvent( gamepads[i].hEvent );
+                gamepads[i].hEvent = NULL;
+            }
+        }
 
         LeaveCriticalSection( &gamepads[i].crit );
 

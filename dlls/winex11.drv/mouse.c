@@ -1790,6 +1790,7 @@ static BOOL X11DRV_TouchEvent( HWND hwnd, XGenericEventCookie *xev )
  */
 void x11drv_xinput2_load(void)
 {
+    if (!usexinput2) return;
 #if defined(SONAME_LIBXI) && defined(HAVE_X11_EXTENSIONS_XINPUT2_H)
     int event, error;
     void *libxi_handle = dlopen( SONAME_LIBXI, RTLD_NOW );

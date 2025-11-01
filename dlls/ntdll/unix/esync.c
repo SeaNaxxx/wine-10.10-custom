@@ -807,7 +807,8 @@ static NTSTATUS __esync_wait_objects( unsigned int count, const HANDLE *handles,
 
     struct esync *objs[MAXIMUM_WAIT_OBJECTS];
     struct pollfd fds[MAXIMUM_WAIT_OBJECTS + 1];
-    int has_esync = 0, has_server = 0;
+    BOOL has_esync = FALSE;
+    BOOL has_server = FALSE;
     BOOL msgwait = FALSE;
     LONGLONG timeleft;
     LARGE_INTEGER now;
@@ -854,9 +855,9 @@ static NTSTATUS __esync_wait_objects( unsigned int count, const HANDLE *handles,
     {
         ret = get_object( handles[i], &objs[i] );
         if (ret == STATUS_SUCCESS)
-            has_esync = 1;
+            has_esync = TRUE;
         else if (ret == STATUS_NOT_IMPLEMENTED)
-            has_server = 1;
+            has_server = TRUE;
         else
             return ret;
     }
@@ -865,7 +866,10 @@ static NTSTATUS __esync_wait_objects( unsigned int count, const HANDLE *handles,
         msgwait = TRUE;
 
     if (has_esync && has_server)
+    {
         FIXME("Can't wait on esync and server objects at the same time!\n");
+        return STATUS_SUCCESS;
+    }
     else if (has_server)
         return STATUS_NOT_IMPLEMENTED;
 

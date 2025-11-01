@@ -1301,7 +1301,7 @@ void manage_desktop( WCHAR *arg )
         initialize_display_settings( width, height );
         initialize_appbar();
 
-        initialize_systray( using_root || nogui, enable_shell, show_systray, no_tray_items );
+        initialize_systray( using_root, enable_shell, show_systray, no_tray_items );
         if (!using_root && enable_launchers) initialize_launchers( hwnd );
 
         if ((shell32 = LoadLibraryW( L"shell32.dll" )) &&

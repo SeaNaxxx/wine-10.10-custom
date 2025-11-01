@@ -120,6 +120,7 @@ static SOCKET server_sock = INVALID_SOCKET;
 static BOOL winsock_loaded = FALSE;
 static BOOL force_update = FALSE;
 static BOOL updated_once = FALSE;
+static char xinput_min_index = 3;
 static struct sockaddr_in client_addr = {0};
 
 static void close_server_socket(void) 
@@ -214,6 +215,7 @@ static void destroy_controllers(void)
 
     thread_running = FALSE;
     release_gamepad_request();
+    xinput_min_index = 3;
 
     for (i = 0; i < XUSER_MAX_COUNT; i++)
     {
@@ -553,12 +555,13 @@ DWORD WINAPI DECLSPEC_HOTPATCH XInputSetState(DWORD index, XINPUT_VIBRATION *vib
  * XInputGetState() in the hook, so we need a wrapper. */
 static DWORD xinput_get_state(DWORD index, XINPUT_STATE *state)
 {
-    if (!state) return ERROR_BAD_ARGUMENTS;
+    if (!state || index >= XUSER_MAX_COUNT) return ERROR_BAD_ARGUMENTS;
 
     updated_once = TRUE;
     start_read_thread();
 
-    if (index >= XUSER_MAX_COUNT) return ERROR_BAD_ARGUMENTS;
+    if (index < xinput_min_index) xinput_min_index = index;
+    if (index == xinput_min_index) index = 0;
     if (!controller_lock(&controllers[index])) return ERROR_DEVICE_NOT_CONNECTED;
 
     *state = controllers[index].state;
